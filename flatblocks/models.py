@@ -1,11 +1,12 @@
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.core.cache import cache
+from hvad.models import TranslatableModel, TranslatedFields
 
 from flatblocks.settings import CACHE_PREFIX
 
 
-class FlatBlock(models.Model):
+class FlatBlock(TranslatableModel):
     """
     Think of a flatblock as a flatpage but for just part of a site. It's
     basically a piece of content with a given name (slug) and an optional
@@ -17,8 +18,10 @@ class FlatBlock(models.Model):
     header = models.CharField(blank=True, null=True, max_length=255,
                 verbose_name=_('Header'),
                 help_text=_("An optional header for this content"))
-    content = models.TextField(verbose_name=_('Content'), blank=True,
+    translations = TranslatedFields(
+        content=models.TextField(verbose_name=_('Content'), blank=True,
                 null=True)
+    )
 
     def __unicode__(self):
         return u"%s" % (self.slug,)
