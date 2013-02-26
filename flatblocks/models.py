@@ -2,6 +2,7 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.core.cache import cache
 from hvad.models import TranslatableModel, TranslatedFields
+from ckeditor.fields import RichTextField
 
 from flatblocks.settings import CACHE_PREFIX
 
@@ -19,7 +20,7 @@ class FlatBlock(TranslatableModel):
                 verbose_name=_('Header'),
                 help_text=_("An optional header for this content"))
     translations = TranslatedFields(
-        content=models.TextField(verbose_name=_('Content'), blank=True,
+        content=RichTextField(verbose_name=_('Content'), blank=True,
                 null=True)
     )
 
