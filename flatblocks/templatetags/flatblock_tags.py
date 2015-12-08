@@ -150,7 +150,7 @@ class FlatBlockNode(template.Node):
         try:
             flatblock = None
             if self.cache_time != 0:
-                cache_key = settings.CACHE_PREFIX + real_slug
+                cache_key = settings.CACHE_PREFIX + real_slug + context['request'].LANGUAGE_CODE
                 flatblock = cache.get(cache_key)
             if flatblock is None:
 
@@ -159,12 +159,23 @@ class FlatBlockNode(template.Node):
                 # This behaviour can be configured using the
                 # FLATBLOCKS_AUTOCREATE_STATIC_BLOCKS setting
                 if self.is_variable or not settings.AUTOCREATE_STATIC_BLOCKS:
-                    flatblock = FlatBlock.objects.get(slug=real_slug)
+                    try:
+                        flatblock = FlatBlock.objects.language(
+                            context['request'].LANGUAGE_CODE).get(slug=real_slug)
+                    except FlatBlock.DoesNotExist:
+                        flatblock = FlatBlock.objects.get(slug=real_slug)
                 else:
-                    flatblock, _ = FlatBlock.objects.get_or_create(
-                                      slug=real_slug,
-                                      defaults = {'content': real_slug}
-                                   )
+                    try:
+                        flatblock = FlatBlock.objects.language(
+                            context['request'].LANGUAGE_CODE).get(slug=real_slug)
+                    except FlatBlock.DoesNotExist:
+                        flatblock = None
+                    if flatblock is None:
+                        try:
+                            flatblock = FlatBlock.objects.get(slug=real_slug)
+                        except FlatBlock.DoesNotExist:
+                            flatblock = FlatBlock.objects.create(slug=real_slug,
+                                                                 content=real_slug)
                 if self.cache_time != 0:
                     if self.cache_time is None or self.cache_time == 'None':
                         logger.debug("Caching %s for the cache's default timeout"

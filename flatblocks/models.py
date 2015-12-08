@@ -30,7 +30,8 @@ class FlatBlock(TranslatableModel):
     def save(self, *args, **kwargs):
         super(FlatBlock, self).save(*args, **kwargs)
         # Now also invalidate the cache used in the templatetag
-        cache.delete('%s%s' % (CACHE_PREFIX, self.slug, ))
+        for lang in self.get_available_languages():
+            cache.delete('%s%s%s' % (CACHE_PREFIX, self.slug, lang))
 
     class Meta:
         verbose_name = _('Flat block')
